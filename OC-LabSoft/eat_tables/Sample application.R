@@ -102,7 +102,7 @@ gcode<-function(step){
     if(W != 0){gcode=c(gcode,paste0("G4 S",W,"; wait in seconds"))}
     gcode
   })))
-  gcode = c(gcode,end_gcode)
+  gcode = c(start_gcode,gcode,end_gcode)
 }
 
 # generates the information plot

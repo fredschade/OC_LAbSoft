@@ -2674,3 +2674,14 @@ Time;Step;File;Log;Visa;Plate
 20180830_12:24:35;Connection;NA;Board connection;;
 20180830_12:59:50;Sample application;gcode/Method.gcode;gcode/Method.gcode;;
 20180830_12:59:59;Sample application;gcode/Method.gcode;gcode/Method.gcode;;
+20180831_13:53:18;Connection;NA;Board connection;;
+20180831_13:54:58;Connection;NA;Board disconnection;;
+20180831_13:55:01;Connection;NA;Board connection;;
+20180831_13:55:46;Sample application;gcode/Method.gcode;gcode/Method.gcode;;
+20180831_13:58:53;Sample application;gcode/Method.gcode;gcode/Method.gcode;;
+20180831_13:58:58;Sample application;gcode/Method.gcode;gcode/Method.gcode;;
+20180831_14:00:31;Sample application;gcode/Method.gcode;gcode/Method.gcode;;
+20180831_14:08:16;Sample application;gcode/Method.gcode;gcode/Method.gcode;;
+20180831_14:08:24;Sample application;gcode/Method.gcode;gcode/Method.gcode;;
+20180831_14:08:27;Sample application;gcode/Method.gcode;gcode/Method.gcode;;
+20180831_14:08:37;Connection;NA;Board disconnection;;

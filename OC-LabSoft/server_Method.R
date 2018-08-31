@@ -267,8 +267,8 @@ observeEvent(input$Method_step_update,{
   withProgress(message = "Processing", value=0, { 
     path=paste0("eat_tables/",Method$control[[step]]$type,".R")
     source(path)
-    Method$control[[step]]$appli_table=appli_Table(Method$settings[[step]])
-    Method$control[[step]]$gcode=gcode(Method$settings[[step]])
+    Method$control[[step]]$appli_table=appli_Table(Method$control[[step]])
+    Method$control[[step]]$gcode=gcode(Method$control[[step]])
     
   })
   Method$selected = input$Method_steps

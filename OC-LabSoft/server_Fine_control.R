@@ -179,7 +179,7 @@ observeEvent(input$test_ink_nozzle_test,{
   if(connect$board){
     gcode = c("G91",paste0("M700 P0 I",input$test_ink_n_bis," L",input$test_ink_L," S",4095))
     for(i in seq(12)){
-      S=rep(0,12);S[i] = 1;S=sum(2^(which(S== 1)-1))
+      S=rep(0,12);S[i] = 1;S = BinToDec(S)
       for(j in seq(10)){gcode = c(gcode,paste0("G1 X",0.25),"M400",paste0("M700 P0 I",input$test_ink_n_bis," L",input$test_ink_L," S",S))}
     }
     gcode = c(gcode,paste0("G1 X",2),"M400",paste0("M700 P0 I",input$test_ink_n_bis," L",input$test_ink_L," S",4095))
@@ -212,7 +212,7 @@ observeEvent(input$test_ink_action,{
 })
 test_ink_gcode <- reactive({
   S=rep(0,12)
-  for(i in seq(12)){if(i %in% as.numeric(input$test_ink_S)){S[i] = 1}};S=sum(2^(which(S== 1)-1))
+  for(i in seq(12)){if(i %in% as.numeric(input$test_ink_S)){S[i] = 1}};S = BinToDec(S)
   rep(paste0("M700 P0 I",input$test_ink_n_bis," L",input$test_ink_L," S",S),input$test_ink_n)
 })
 
