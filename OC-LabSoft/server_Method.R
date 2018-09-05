@@ -114,36 +114,28 @@ output$Method_feedback = renderText({
 
 observeEvent(input$Method_step_exec,{
   step = as.numeric(input$Method_steps)
-  if(length(Method$control) == 0){
-    shinyalert(title = "stupid user",text = "No step selected",type="error",closeOnClickOutside = T, showCancelButton = F)
-  }else if(connect$board){
-    if(Method$control[[step]]$type != "Documentation"){
-      # reate the gcode
+  if(Method$control[[step]]$type != "Documentation"){
+      # read the gcode
       Method_file = paste0("gcode/","Method",".gcode")
       Log = Method_file
       fileConn<-file(Method_file)
-      print(fileConn)
       writeLines(Method$control[[step]]$gcode, fileConn)
       close(fileConn)
       # put it in the log
       write(paste0(format(Sys.time(),"%Y%m%d_%H:%M:%S"),";",Method$control[[step]]$type,";",Log,";",Log,";",connect$Visa,";",input$Plate),file="log/log.txt",append = T)
-      # send the gcode
-      main$send_gcode(Method_file)
+      gcode_sender$send_gcode(Method_file, printer)
+	
       Method_feedback$text = paste0("Step ",input$Method_steps," started")
     }else{
       Method$control[[step]]$exec(Method$control[[step]],input$Plate,main)
     }
-  }else{
-    shinyalert(title = "stupid user",text = "Board not connected",type="error",closeOnClickOutside = T, showCancelButton = F)
-  }
-  
-  
 })
 
 ## part for emergency stop
-rv <- reactiveValues(
-  id=list()
-)
+observeEvent(input$Method_step_stop,{
+	printer$cancelprint()
+})
+
 
 ## gcode viewer
 output$Method_control_gcode = renderUI({

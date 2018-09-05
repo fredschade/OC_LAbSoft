@@ -69,21 +69,21 @@ gcode<-function(step){
   # plate_x=100
   
   
-  start_gcode = c("G28 X0; home X axis",
-                  "G28 Y0; home Y axis",
-                  "G21 ; set units to millimeters",
-                  "G90 ; use absolute coordinates",
-                  paste0("G1 F",60*speed," ; set speed in mm per min for the movement"),
-                  paste0("G1 X",dist_y," ; go in X position") 
+  start_gcode = c("G28 X0",
+                  "G28 Y0",
+                  "G21",
+                  "G90",
+                  paste0("G1 F",60*speed),
+                  paste0("G1 X",dist_y) 
   )
-  end_gcode = c("G28 X0; home X axis",
-                "G28 Y0; home Y axis",
-                "M84     ; disable motors")
+  end_gcode = c("G28 X0",
+                "G28 Y0",
+                "M84 ")
   ## previously function a_to_gcode_X_fix
   
   ## begin gcode
   ## iterate
-  gcode = c(start_gcode,unlist(lapply(seq(path),function(k){
+  gcode = c(unlist(lapply(seq(path),function(k){
     gcode = c()
     for(band in seq(nrow(SA_table))){
       Y_coord = round(seq(from = dist_y+(band-1)*(gap+band_length),by=reso,length.out = ceiling(band_length/reso)),3)
@@ -92,14 +92,14 @@ gcode<-function(step){
         I = SA_table$I[band]
         for(Repeat in seq(SA_table$Repeat[band])){
           for(i in Y_coord){ # X loop, need modulo
-            gcode = c(gcode,paste0("G1 Y",i," ; go in position - path: ",k))
-            gcode = c(gcode,"M400 ; Wait for current moves to finish ")
-            gcode = c(gcode,paste0("M700 P0 I",I," L",L," S",S," ; Fire"))
+            gcode = c(gcode,paste0("G1 Y",i))
+            gcode = c(gcode,"M400")
+            gcode = c(gcode,paste0("M700 P0 I",I," L",L," S",S))
           }
         }
       }
     }
-    if(W != 0){gcode=c(gcode,paste0("G4 S",W,"; wait in seconds"))}
+    if(W != 0){gcode=c(gcode,paste0("G4 S",W))}
     gcode
   })))
   gcode = c(start_gcode,gcode,end_gcode)

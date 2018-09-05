@@ -23,7 +23,7 @@ output$ink_test_control_1 = renderUI({
            )),
 
       column(4,
-           actionButton("test_ink_M84","Disable Motors")
+           actionButton("stop","Disable Motors")
            )),
       fluidRow(
         column(8,
@@ -61,106 +61,51 @@ output$ink_test_control_1 = renderUI({
 })
 #---------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------
-#fuction
+#function
 #---------
 ## motor control
 
 observeEvent(input$test_ink_cmd_button,{
-  if(connect$board){
-    test_ink_file = "gcode/test_ink_cmd.gcode"
-    Log = test_ink_file
-    fileConn<-file(test_ink_file)
-    writeLines(toupper(input$test_ink_cmd), fileConn)
-    close(fileConn)  # send the gcode
-    main$send_gcode(test_ink_file)
-  }else{
-    shinyalert(title = "Error",text = "Board not connected",type="error",closeOnClickOutside = T, showCancelButton = F)
-  }
+	printer$send(toupper(input$test_ink_cmd))
+	printer$Print()
 })
 
 observeEvent(input$xleft,{
-  if(connect$board){
-    # create the gcode
-    test_ink_file = "gcode/test_ink_cmd.gcode"
-    Log = test_ink_file
-    fileConn<-file(test_ink_file)
-    writeLines("G91\n G1 X-5", fileConn)
-    close(fileConn)  # send the gcode
-    main$send_gcode(test_ink_file)
-  }else{
-    shinyalert(title = "Error",text = "Board not connected",type="error",closeOnClickOutside = T, showCancelButton = F)
-  }
+	printer$send("G91\nG1 X-5")
+	printer$Print()
 })
 
 observeEvent(input$xhome,{
-  if(connect$board){
-    # create the gcode
-    test_ink_file = "gcode/test_ink_cmd.gcode"
-    Log = test_ink_file
-    fileConn<-file(test_ink_file)
-    writeLines("G28 X0\nG90", fileConn)
-    close(fileConn)  # send the gcode
-    main$send_gcode(test_ink_file)
-  }else{
-    shinyalert(title = "Error",text = "Board not connected",type="error",closeOnClickOutside = T, showCancelButton = F)
-  }
+	printer$send("G28 X0\nG90")
+	printer$Print()
 })
 
 observeEvent(input$xright,{
-  if(connect$board){
-    # create the gcode
-    test_ink_file = "gcode/test_ink_cmd.gcode"
-    Log = test_ink_file
-    fileConn<-file(test_ink_file)
-    writeLines("G91\nG1 X5", fileConn)
-    close(fileConn)  # send the gcode
-    main$send_gcode(test_ink_file)
-  }else{
-    shinyalert(title = "Error",text = "Board not connected",type="error",closeOnClickOutside = T, showCancelButton = F)
-  }
+	printer$send("G91\nG1 X5")
+	printer$Print()
 })
 
 observeEvent(input$yup,{
-  if(connect$board){
-    # create the gcode
-    test_ink_file = "gcode/test_ink_cmd.gcode"
-    Log = test_ink_file
-    fileConn<-file(test_ink_file)
-    writeLines("G91\nG1 Y5", fileConn)
-    close(fileConn)  # send the gcode
-    main$send_gcode(test_ink_file)
-  }else{
-    shinyalert(title = "Error",text = "Board not connected",type="error",closeOnClickOutside = T, showCancelButton = F)
-  }
+    	printer$send("G91\nG1 Y5")
+    	printer$Print()
 })
 
 observeEvent(input$yhome,{
-  if(connect$board){
-    # create the gcode
-    test_ink_file = "gcode/test_ink_cmd.gcode"
-    Log = test_ink_file
-    fileConn<-file(test_ink_file)
-    writeLines("G28 Y0", fileConn)
-    close(fileConn)  # send the gcode
-    main$send_gcode(test_ink_file)
-  }else{
-    shinyalert(title = "Error",text = "Board not connected",type="error",closeOnClickOutside = T, showCancelButton = F)
-  }
+    	printer$send("G28 Y0\nG90")
+    	printer$Print()
 })
 
 observeEvent(input$ydown,{
-  if(connect$board){
-    # create the gcode
-    test_ink_file = "gcode/test_ink_cmd.gcode"
-    Log = test_ink_file
-    fileConn<-file(test_ink_file)
-    writeLines("G91\nG1 Y-5", fileConn)
-    close(fileConn)  # send the gcode
-    main$send_gcode(test_ink_file)
-  }else{
-    shinyalert(title = "Error",text = "Board not connected",type="error",closeOnClickOutside = T, showCancelButton = F)
-  }
+	printer$send("G91\nG1 Y-5")
+        printer$Print()
 })
+
+observeEvent(input$stop,{
+	printer$send("M18")
+        printer$Print()
+})
+
+
 #---------------------------------------------------------------------------------------
 #Inkjet
 #-------
@@ -190,7 +135,7 @@ observeEvent(input$test_ink_nozzle_test,{
     writeLines(gcode, fileConn)
     close(fileConn)
     # send the gcode
-    main$send_gcode(test_ink_file)
+    send_gcode(test_ink_file)
   }else{
     shinyalert(title = "Error",text = "Board not connected",type="error",closeOnClickOutside = T, showCancelButton = F)
   }
@@ -205,7 +150,7 @@ observeEvent(input$test_ink_action,{
     # put it in the log
     write(paste0(format(Sys.time(),"%Y%m%d_%H:%M:%S"),";","test_ink;",test_ink_file,";",Log,";",connect$Visa,";",input$Plate),file="log/log.txt",append = T)
     # send the gcode
-    main$send_gcode(test_ink_file)
+    send_gcode(test_ink_file)
   }else{
     shinyalert(title = "Error",text = "Board not connected",type="error",closeOnClickOutside = T, showCancelButton = F)
   }
@@ -222,18 +167,15 @@ test_ink_gcode <- reactive({
 
 
 observeEvent(input$test_ink_gcode_file_action,{
-  if(connect$board){
-    main$send_gcode(input$test_ink_gcode_file$datapath)
-  }else{
-    shinyalert(title = "Error",text = "Board not connected",type="error",closeOnClickOutside = T, showCancelButton = F)
-  }
+ # send the gcode
+ gcode_sender$send_gcode(input$test_ink_gcode_file$datapath, printer)
 })
 
 #----------------------------------------------------------------------------------------
 #Docu
   observeEvent(input$test_ink_visu_position,{
     if(connect$board){
-      main$send_gcode("gcode/Visu_position.gcode")
+      send_gcode("gcode/Visu_position.gcode")
     }else{
       shinyalert(title = "Error",text = "Board not connected",type="error",closeOnClickOutside = T, showCancelButton = F)
     }

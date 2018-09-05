@@ -23,12 +23,23 @@ shinyServer(function(input, output,session) {
   source("server_Fine_control.R",local = T)
   source("server_Method.R",local = T)  
   
+# connect with the hardware and use printcore to control
   connect = reactiveValues(board = board)
-  main = py_run_file("setup.py")
+  gcode_sender<-py_run_file("gcode_sender.py")
+  source_python("printrun/printcore.py")
+  printer=printcore()
+  printer$connect("/dev//ttyACM0",115200)
+  printer$listen_until_online()
+  if (printer$online){
+    # create the test gcode
+      print("Connected")
+      connect$board=TRUE
+      }
+  else {print("try again")}
   
-  
+
   session$onSessionEnded(function() {
-    main$close_connections() ## py
+    close_connections() ## py
   })
   observeEvent(input$Shutdown,{
     if(getwd() == "/home/pi/OC_manager"){
@@ -65,24 +76,27 @@ shinyServer(function(input, output,session) {
       shinyalert(title = "stupid user",text = "No board selected",type="error")
     }else{
       print("Connecting")
-      main$connect_board(input$Serial_port) ## py
+      printer$connect(input$Serial_port,115200)## py
+      printer$listen_until_online()
+      if (printer$online){
     # create the test gcode
       print("Connected")
-      # put it in the log
-      write(paste0(format(Sys.time(),"%Y%m%d_%H:%M:%S"),";","Connection;",NA,";","Board connection",";",connect$Visa,";",input$Plate),file="log/log.txt",append = T)
-      connect$board = T
+      connect$board=TRUE
+      }
+      else {print("try again")}
     }
   })
   
   observeEvent(input$Serial_port_disconnect,{
-    main$close_connections() 
-    write(paste0(format(Sys.time(),"%Y%m%d_%H:%M:%S"),";","Connection;",NA,";","Board disconnection",";",connect$Visa,";",input$Plate),file="log/log.txt",append = T)
-    connect$board = F
+    printer$disconnect()
+    if (!printer$online){
+    # create the test gcode
+      connect$board=FALSE
+      print("disconnected")
+    }
+      else {print("try again")}
   })
-  observeEvent(input$Serial_port_disconnect_bis,{
-    main$close_connections() ## py
-    connect$board = F
-  })
+
   
   TempInvalidate <- reactiveTimer(2000)
 
