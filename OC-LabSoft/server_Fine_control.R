@@ -110,21 +110,10 @@ observeEvent(input$stop,{
 #Inkjet
 #-------
 
-test_TempInvalidate <- reactiveTimer(2000)
-output$temp_1 = renderUI({
-  validate(
-    need(connect$board,"Please connect the board")
-  )
-  tagList(
-    h6("M104 S90; set temp to 90 degree celsius")
-  )
-})
-
 observeEvent(input$test_ink_nozzle_test,{
-  if(connect$board){
     gcode = c("G91",paste0("M700 P0 I",input$test_ink_n_bis," L",input$test_ink_L," S",4095))
     for(i in seq(12)){
-      S=rep(0,12);S[i] = 1;S = BinToDec(S)
+      S=rep(0,12);S[i] = 1;S = S=sum(2^(which(S== 1)-1))
       for(j in seq(10)){gcode = c(gcode,paste0("G1 X",0.25),"M400",paste0("M700 P0 I",input$test_ink_n_bis," L",input$test_ink_L," S",S))}
     }
     gcode = c(gcode,paste0("G1 X",2),"M400",paste0("M700 P0 I",input$test_ink_n_bis," L",input$test_ink_L," S",4095))
@@ -135,13 +124,10 @@ observeEvent(input$test_ink_nozzle_test,{
     writeLines(gcode, fileConn)
     close(fileConn)
     # send the gcode
-    send_gcode(test_ink_file)
-  }else{
-    shinyalert(title = "Error",text = "Board not connected",type="error",closeOnClickOutside = T, showCancelButton = F)
-  }
+    gcode_sender$send_gcode(test_ink_file,printer)
 })
+
 observeEvent(input$test_ink_action,{
-  if(connect$board){
     test_ink_file = paste0("gcode/","test_ink",".gcode")
     Log = test_ink_file
     fileConn<-file(test_ink_file)
@@ -150,14 +136,11 @@ observeEvent(input$test_ink_action,{
     # put it in the log
     write(paste0(format(Sys.time(),"%Y%m%d_%H:%M:%S"),";","test_ink;",test_ink_file,";",Log,";",connect$Visa,";",input$Plate),file="log/log.txt",append = T)
     # send the gcode
-    send_gcode(test_ink_file)
-  }else{
-    shinyalert(title = "Error",text = "Board not connected",type="error",closeOnClickOutside = T, showCancelButton = F)
-  }
+    gcode_sender$send_gcode(test_ink_file,printer)
 })
 test_ink_gcode <- reactive({
   S=rep(0,12)
-  for(i in seq(12)){if(i %in% as.numeric(input$test_ink_S)){S[i] = 1}};S = BinToDec(S)
+  for(i in seq(12)){if(i %in% as.numeric(input$test_ink_S)){S[i] = 1}};S = S=sum(2^(which(S== 1)-1))
   rep(paste0("M700 P0 I",input$test_ink_n_bis," L",input$test_ink_L," S",S),input$test_ink_n)
 })
 
@@ -173,26 +156,16 @@ observeEvent(input$test_ink_gcode_file_action,{
 
 #----------------------------------------------------------------------------------------
 #Docu
-  observeEvent(input$test_ink_visu_position,{
-    if(connect$board){
-      send_gcode("gcode/Visu_position.gcode")
-    }else{
-      shinyalert(title = "Error",text = "Board not connected",type="error",closeOnClickOutside = T, showCancelButton = F)
-    }
+
+observeEvent(input$test_ink_visu_position,{
+      gcode_sender$send_gcode("gcode/Visu_position.gcode")
   })
+
 observeEvent(input$test_ink_ring_on,{
-  if(connect$board){
       system("sudo python /home/pi/rpi_ws281x/python/examples/led-on.py")
-  }else{
-   shinyalert(title = "Error",text = "Board not connected",type="error",closeOnClickOutside = T, showCancelButton = F)
-  }
 })
 observeEvent(input$test_ink_ring_off,{
-  if(connect$board){
     system("sudo python /home/pi/rpi_ws281x/python/examples/led-off.py")
-  }else{
-    shinyalert(title = "Error",text = "Board not connected",type="error",closeOnClickOutside = T, showCancelButton = F)
-  }
 })
 
 

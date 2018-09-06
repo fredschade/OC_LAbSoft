@@ -1,10 +1,4 @@
 #to send a file of gcode to the printer
-# import sys
-# 
-# sys
-
-# print(pwd)
-
 import os
 import sys
 sys.path.append(os.getcwd())

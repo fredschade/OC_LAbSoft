@@ -1,4 +1,3 @@
-
 # This is the server logic for a Shiny web application.
 # You can find out more about building applications with Shiny here:
 #
@@ -39,8 +38,9 @@ shinyServer(function(input, output,session) {
   
 
   session$onSessionEnded(function() {
-    printer$disconnect()
+    printer$disconnect() ## py
   })
+
   observeEvent(input$Shutdown,{
     if(getwd() == "/home/pi/OC_manager"){
       system("sudo shutdown now")
