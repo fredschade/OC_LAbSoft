@@ -39,7 +39,7 @@ shinyServer(function(input, output,session) {
   
 
   session$onSessionEnded(function() {
-    close_connections() ## py
+    printer$disconnect()
   })
   observeEvent(input$Shutdown,{
     if(getwd() == "/home/pi/OC_manager"){

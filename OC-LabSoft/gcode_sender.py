@@ -5,7 +5,6 @@
 
 # print(pwd)
 
-import atexit
 import os
 import sys
 sys.path.append(os.getcwd())
@@ -29,6 +28,3 @@ def send_gcode(file, printer):
 
 
 
-
-
-atexit.register(close_connections)
