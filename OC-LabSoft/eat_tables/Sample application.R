@@ -21,7 +21,7 @@ appli_Table<-function(step){
       {
         appli_table$real_Volumn[i]=round(appli_table$wish_Volumn[i]/Vol_band,0)*Vol_band
       }
-      diffRows=tablelength - nbr_band
+      diffRows=nbr_band -tablelength
       ## modify table length
       if(diffRows>0)
       {
@@ -81,7 +81,6 @@ generate_gcode<-function(step){
   band_end=seq(from=dist_y+gap,by=gap,length.out = nbr_band)
   nozzle= step$appli_table$nozzle
   repSpray=step$appli_table$real_Volumn/Vol_band
-  print(repSpray)
   
   gcode=c()
   #gcode creator
