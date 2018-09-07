@@ -7,7 +7,7 @@ Band length [mm];6
 Track distance [mm];8
 Number of bands;5
 Speed [mm/s];50
-Number of paths;10
+Number of Fire;10
 Pulse delay [µs] (<20);5
 Delay between path [s];0
-Used Nozzle;1
+

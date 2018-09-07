@@ -4,105 +4,113 @@ appli_Table<-function(step){
   #getting infos
   table = step$table
   band_length = table[table[,1] == "Band length [mm]",2]
-  dist_x = table[table[,1] == "First application position X [mm]",2]
-  dist_x = dist_x-band_length/2
-  dist_y = table[table[,1] == "application position Y [mm]",2]
   nbr_band = table[table[,1] == "Number of bands",2]
-  dev_dir = table[table[,1] == "Development direction (X: 0, Y: 1)",2] ## 0 for X, 1 for Y
-  plate_y = table[table[,1] == "Plate Y [mm]",2]
-  plate_x = table[table[,1] == "Plate X [mm]",2]  
-  
-  ## deal with plate dimension
-  dist_x = dist_x + 50-plate_x/2
-  dist_y = dist_y + 50-plate_y/2
+  I= table[table[,1] == "Number of Fire",2]
 
-  
-  
-  ## deal with evolution in nbr of band
-  if(is.null(step$appli_table)){## create original table
-    appli_table = data.frame(Repeat = rep(1,nbr_band),I = rep(10,nbr_band),Use = rep(T,nbr_band))
-  }else if(nrow(step$appli_table) < nbr_band){## modify table length
-    appli_table = rbind(
-      step$appli_table,
-      data.frame(Repeat = rep(1,nbr_band),I = rep(10,nbr_band),Use = rep(T,nbr_band))
-    )[seq(nbr_band),]
-  }else if(nrow(step$appli_table) > (nbr_band)){## modify table length
-    appli_table = step$appli_table[seq(nbr_band),]
+  #applied Volumn per band
+  Vol_band=band_length/reso*I*Drop_vol/1000
+  ## create original table |nozzle | Vol_wish | Vol_real
+  if(is.null(step$appli_table)){
+    appli_table = data.frame(nozzle=rep(1,nbr_band), wish_Volumn=rep(Vol_band,nbr_band), real_Volumn=rep(Vol_band,nbr_band), unit=rep("µl",nbr_band))
   }
-  else {appli_table=step$appli_table}
+  else
+    {
+      appli_table=step$appli_table
+      tablelength=nrow(step$appli_table)
+      for (i in 1:tablelength)
+      {
+        appli_table$real_Volumn[i]=round(appli_table$wish_Volumn[i]/Vol_band,0)*Vol_band
+      }
+      diffRows=tablelength - nbr_band
+      ## modify table length
+      if(diffRows>0)
+      {
+      appli_table=rbind(appli_table,
+                        data.frame(nozzle=rep(1,diffRows), wish_Volumn=rep(Vol_band,diffRows), real_Volumn=rep(Vol_band,diffRows)), unit=rep("µl",diffRows))
+      }
+      else if(diffRows<0)
+      {
+      appli_table = step$appli_table[seq(nbr_band),]
+      }
+    }    
   rownames(appli_table) = seq(nrow(appli_table))
   
   return(appli_table)
 }
 
 # generates gcode for the Application  
-gcode<-function(step){  
+generate_gcode<-function(step){  
   #getting infos
   table = step$table
   band_length = table[table[,1] == "Band length [mm]",2]
-  dist_x = table[table[,1] == "First application position X [mm]",2]
-  dist_x = dist_x-band_length/2
-  dist_y = table[table[,1] == "application position Y [mm]",2]
+  # application position X == motor control Y
+  dist_y = table[table[,1] == "First application position X [mm]",2]
+  plate_y = table[table[,1] == "Plate X [mm]",2]   
+  # application position Y == motor control X
+  dist_x = table[table[,1] == "application position Y [mm]",2]
+  plate_x = table[table[,1] == "Plate Y [mm]",2]
   gap = table[table[,1] == "Track distance [mm]",2]
-  gap=gap-band_length
+  I= table[table[,1] == "Number of Fire",2]
   speed = table[table[,1] == "Speed [mm/s]",2]
-  path=table[table[,1] == "Number of paths",2]
   L=table[table[,1] == "Pulse delay [µs] (<20)",2]
-  W=table[table[,1] == "Delay between path [s]",2]
-  nozzle = table[table[,1] == "Used Nozzle",2]
-  dev_dir = table[table[,1] == "Development direction (X: 0, Y: 1)",2] ## 0 for X, 1 for Y
+  nbr_band = table[table[,1] == "Number of bands",2]
 
 
-  ## empty array
-  inche = 25.4 # mm/inche
-  dpi = 96
-  reso = inche/dpi
-  S = rep(0,12)
-  for(i in seq(12)){if(i %in% as.numeric(nozzle)){S[i] = 1}};
-  S=sum(2^(which(S== 1)-1))
-  shift = round((1 - nozzle)*reso,3)
-  dist_y = dist_y + shift
+  ## deal with plate dimension
+  dist_x = dist_x + 50-plate_x/2
+  dist_y = dist_y + 50-plate_y/2
   
-  SA_table=step$appli_table
-  
-  # nozzle_Y = 1 ## use only one nozzle
-  # plate_x=100
-  
-  
+
+  #gcode start
   start_gcode = c("G28 X0",
                   "G28 Y0",
                   "G21",
                   "G90",
                   paste0("G1 F",60*speed),
-                  paste0("G1 X",dist_y) 
+                  paste0("G1 X",dist_x) 
   )
+  #gcode end
   end_gcode = c("G28 X0",
                 "G28 Y0",
                 "M84 ")
-  ## previously function a_to_gcode_X_fix
+
+  Vol_band=band_length/reso*I*Drop_vol/1000
   
-  ## begin gcode
-  ## iterate
-  gcode = c(unlist(lapply(seq(path),function(k){
-    gcode = c()
-    for(band in seq(nrow(SA_table))){
-      Y_coord = round(seq(from = dist_y+(band-1)*(gap+band_length),by=reso,length.out = ceiling(band_length/reso)),3)
-      Y_coord = Y_coord + shift
-      if(SA_table$Use[band]){
-        I = SA_table$I[band]
-        for(Repeat in seq(SA_table$Repeat[band])){
-          for(i in Y_coord){ # X loop, need modulo
-            gcode = c(gcode,paste0("G1 Y",i))
-            gcode = c(gcode,"M400")
-            gcode = c(gcode,paste0("M700 P0 I",I," L",L," S",S))
-          }
-        }
-      }
+  #course
+  band_start=seq(from=dist_y,by=gap,length.out = nbr_band)
+  band_end=seq(from=dist_y+gap,by=gap,length.out = nbr_band)
+  nozzle= step$appli_table$nozzle
+  repSpray=step$appli_table$real_Volumn/Vol_band
+  print(repSpray)
+  
+  gcode=c()
+  #gcode creator
+  for (j in seq(nbr_band))
+  {
+    # calculate each nozzle as binary Code because of the gcode 
+    #S= 3 -> 000000000011 -> nozzle 1 and 2 fire
+    # nozzle 3 -> 000000000100 -> S= 4
+    S = rep(0,12)
+    for(l in seq(12)){if(l %in% as.numeric(nozzle[j])){S[l] = 1}};
+    S=sum(2^(which(S== 1)-1))
+    
+    # shift because of selected nozzle
+    shift = round((1 - nozzle[j])*reso,3)
+    # gcode per band
+    number_of_steps= band_length/reso
+    gcode_band= c()
+    for (i in seq(from=band_start[j]+shift, by=reso, length.out = number_of_steps))
+    {
+    gcode_band=c(gcode_band,paste0("G1 Y",i),                    # go in Position
+                                  "M400",                        # wait until fire
+                            paste0("M700 P0 I",I," L",L," S",S)) # fire 
     }
-    if(W != 0){gcode=c(gcode,paste0("G4 S",W))}
-    gcode
-  })))
-  gcode = c(start_gcode,gcode,end_gcode)
+    # repeat gcode per band to applie Vol_wish
+    n=as.integer(repSpray[j])
+    gcode=c(gcode,rep(gcode_band,n))
+  }
+  gcode=c(start_gcode,gcode,end_gcode)
+  return(gcode)
 }
 
 # generates the information plot
@@ -111,43 +119,24 @@ plot_step<-function(step) {
   table = step$table
   band_length = table[table[,1] == "Band length [mm]",2]
   dist_x = table[table[,1] == "First application position X [mm]",2]
-  dist_x = dist_x-band_length/2
   gap = table[table[,1] == "Track distance [mm]",2]
-  gap=gap-band_length
   dist_y = table[table[,1] == "application position Y [mm]",2]
-  dev_dir = table[table[,1] == "Development direction (X: 0, Y: 1)",2] ## 0 for X, 1 for Y
   plate_y = table[table[,1] == "Plate Y [mm]",2]
   plate_x = table[table[,1] == "Plate X [mm]",2]    
-  nozzle = table[table[,1] == "Used Nozzle",2]
-  path=table[table[,1] == "Number of paths",2]
   
   ## deal with plate dimension
   dist_x = dist_x + 50-plate_x/2
   dist_y = dist_y + 50-plate_y/2
-
-  inche = 25.4 # mm/inche
-  dpi = 96
-  reso = inche/dpi
-  S = rep(0,12)
-  for(i in seq(12)){if(i %in% as.numeric(nozzle)){S[i] = 1}};
-  S=sum(2^(which(S == 1)-1))
-  shift = round((1 - nozzle)*reso,3)
   
   SA_table=step$appli_table
     plot(c(1,100),c(1,100),type="n",xaxt = 'n',xlim=c(0,100),ylim=c(100,0),xlab="",ylab="Application direction (X) ")
     axis(3)
     mtext("Migration direction (Y)", side=3, line=3)
     for(band in seq(nrow(SA_table))){
-      if(SA_table$Use[band]){
           segments(x0 = dist_y,
-                   y0 = dist_x+shift+(band-1)*(gap+band_length),
-                   y1 = dist_x+shift+(band-1)*(gap+band_length)+band_length)
-      }
+                   y0 = dist_x+(band-1)*gap,
+                   y1 = dist_x+(band-1)*gap+band_length)
     }
     symbols(x=50,y=50,add = T,inches = F,rectangles = rbind(c(plate_y,plate_x)),lty=2)
 
-
-    step$info = c(paste0("Band ",seq(nrow(SA_table)),": ", SA_table$I*Drop_vol*ceiling(band_length/reso)*SA_table$Repeat*path/1000," µL used\n")
-  )
-  return(step)
 }

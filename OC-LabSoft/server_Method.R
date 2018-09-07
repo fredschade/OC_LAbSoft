@@ -98,7 +98,7 @@ observeEvent(input$Method_steps,{
     path=paste0("eat_tables/",Method$control[[step]]$type,".R")
     source(path)
     Method$control[[step]]$appli_table=appli_Table(Method$control[[step]])
-    Method$control[[step]]$gcode=gcode(Method$control[[step]])
+    Method$control[[step]]$gcode=generate_gcode(Method$control[[step]])
   }
 })
 
@@ -145,21 +145,12 @@ output$Method_control_gcode = renderUI({
   if(!is.null(input$Method_steps)){
     tagList(
       fluidPage(
-        #fluidRow( DT::dataTableOutput("Method_gcode")),
         fluidRow(downloadButton("Method_gcode_download","Download Gcode"))
       )
     )
   }
 })
 
-# output$Method_gcode = DT::renderDataTable({
-#   validate(
-#     need(length(Method$control) > 0 ,"add a step or load a saved method")
-#   )
-#   if(!is.null(input$Method_steps)){
-#     data.frame(gcode = Method$control[[as.numeric(input$Method_steps)]]$gcode)
-#   }
-# }, options = list(pageLength = 2))
 
 output$Method_gcode_download <- downloadHandler(
   filename = function(x){paste0("OC_manager_",
@@ -251,16 +242,20 @@ output$Method_control_settings = renderUI({
 
 observeEvent(input$Method_step_update,{
   step = as.numeric(input$Method_steps)
+  #update Settings
   data = hot_to_r(input$Method_step_option)
   Method$settings[[step]]$table=data
   Method$control[[step]]$table=data
-
+  #update applied table 
+  data=hot_to_r(input$Method_step_appli_table)
+  Method$settings[[step]]$appli_table=data
+  Method$control[[step]]$appli_table=data
   ## eat tables
   withProgress(message = "Processing", value=0, { 
     path=paste0("eat_tables/",Method$control[[step]]$type,".R")
     source(path)
     Method$control[[step]]$appli_table=appli_Table(Method$control[[step]])
-    Method$control[[step]]$gcode=gcode(Method$control[[step]])
+    Method$control[[step]]$gcode=generate_gcode(Method$control[[step]])
     
   })
   Method$selected = input$Method_steps
@@ -279,7 +274,9 @@ output$Method_step_option = renderRHandsontable({
 output$Method_step_appli_table = renderRHandsontable({
   if(!is.null(input$Method_steps)){
   data = Method$control[[as.numeric(input$Method_steps)]]$appli_table
-  rhandsontable(data)
+  rhandsontable(data)%>%
+    hot_col("real_Volumn", readOnly = TRUE)%>%
+    hot_col("unit", readOnly = TRUE)
   }
 })
 
@@ -293,9 +290,7 @@ output$Method_control_infos = renderUI({
   if(!is.null(input$Method_steps)){
     tagList(
       column(12,
-             column(6, plotOutput("Method_plot",width="400px",height="400px")),
-             column(5,offset=1,verbatimTextOutput("Method_step_feedback"))
-      )
+        plotOutput("Method_plot",width="400px",height="400px"))
     )
   }
 })
@@ -309,7 +304,7 @@ output$Method_plot = renderPlot({
     step = as.numeric(input$Method_steps)
     path=paste0("eat_tables/",Method$control[[step]]$type,".R")
     source(path)
-    Method$control[[step]]=plot_step(Method$control[[step]])
+    plot_step(Method$control[[step]])
     
   }
   else
