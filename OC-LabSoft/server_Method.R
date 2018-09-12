@@ -98,6 +98,7 @@ observeEvent(input$Method_steps,{
     path=paste0("eat_tables/",Method$control[[step]]$type,".R")
     source(path)
     Method$control[[step]]$appli_table=appli_Table(Method$control[[step]])
+    Method$settings[[step]]$appli_table=Method$control[[step]]$appli_table
     Method$control[[step]]$gcode=generate_gcode(Method$control[[step]])
   }
 })
@@ -205,6 +206,7 @@ observeEvent(input$Method_load,{
       print(step)
       Method$control[[step]] = list(type= Method$settings[[step]]$type,
                             table=Method$settings[[step]]$table,
+			    appli_table=Method$settings[[step]]$appli_table,
                             gcode = NULL,
                             info = "Update to see the info",
                             Done = F)

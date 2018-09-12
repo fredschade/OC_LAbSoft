@@ -14,7 +14,7 @@ dbHeader <- dashboardHeader(title = "OC-LabLite")
 
 dashboardPage(
   dbHeader,
-  dashboardSidebar( 
+  dashboardSidebar(width=125, 
     sidebarMenu(style = "position: fixed; overflow: visible;",
                 menuItem("Connection", tabName = "Connect",icon=icon("home")),
                 menuItem("Fine control", tabName = "test_ink",icon=icon("wrench")),

@@ -26,8 +26,9 @@ appli_Table<-function(step){
       if(diffRows>0)
       {
       appli_table=rbind(appli_table,
-                        data.frame(nozzle=rep(1,diffRows), wish_Volumn=rep(Vol_band,diffRows), real_Volumn=rep(Vol_band,diffRows)), unit=rep("µl",diffRows))
-      }
+                        data.frame(nozzle=rep(1,diffRows), wish_Volumn=rep(Vol_band,diffRows), real_Volumn=rep(Vol_band,diffRows), unit=rep("µl",diffRows))
+      			)
+}
       else if(diffRows<0)
       {
       appli_table = step$appli_table[seq(nbr_band),]
@@ -57,8 +58,8 @@ generate_gcode<-function(step){
 
 
   ## deal with plate dimension
-  dist_x = dist_x + 50-plate_x/2
-  dist_y = dist_y + 50-plate_y/2
+  dist_x = xlevel+dist_x + 50-plate_x/2
+  dist_y = ylevel+dist_y + 50-plate_y/2
   
 
   #gcode start
@@ -102,7 +103,8 @@ generate_gcode<-function(step){
     {
     gcode_band=c(gcode_band,paste0("G1 Y",i),                    # go in Position
                                   "M400",                        # wait until fire
-                            paste0("M700 P0 I",I," L",L," S",S)) # fire 
+                            paste0("M700 P0 I",I," L",L," S",S), # fire 
+				  "M400")			 # wait
     }
     # repeat gcode per band to applie Vol_wish
     n=as.integer(repSpray[j])

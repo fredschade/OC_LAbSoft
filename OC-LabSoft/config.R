@@ -8,6 +8,10 @@ board = F ## set to T for development purpose if you are not connected to the ar
 
 Drop_vol = 0.15 # in nL, use to calculate volume in Methods
 
+#position, where nozzle 12 are on the upper left corner of the plate
+xlevel=1
+ylevel=10
+
 # resolution nozzles
 inche = 25.4 # mm/inche
 dpi = 96 # resolution of the Hp cartdrige (datasheet), dpi=number/inch
