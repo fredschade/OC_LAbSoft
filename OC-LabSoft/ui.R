@@ -10,7 +10,7 @@ library(shinydashboard)
 library(shinyBS)
 library(shinyalert)
 
-dbHeader <- dashboardHeader(title = "OC-LabLite")
+dbHeader <- dashboardHeader(title = "OC_LabSoft")
 
 dashboardPage(
   dbHeader,

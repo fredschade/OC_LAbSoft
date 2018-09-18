@@ -3,16 +3,16 @@
 output$Method_control_1 = renderUI({
   tagList(
     fluidPage(
-    column(3,box(title = "methods", width = "25%", height = 350,solidHeader = TRUE,status = "primary",
+    column(3,box(title = "Methods", width = "25%", height = 350,solidHeader = TRUE,status = "primary",
         fluidRow(
         column(1, actionButton("Method_step_add","",icon=icon("plus"))),
         column(1,offset=1,actionButton("Method_step_delete","",icon = icon("window-close")))),
         fluidRow(column(10,ofsett=1,selectizeInput("Method_step_new","",choices = steps_choices, width = "100%"))),
         fluidRow(
-        sidebarPanel( id = "steps",style = "overflow-y:scroll; height: 175px; position:relative; ", width = 12,
+        sidebarPanel( id = "Steps",style = "overflow-y:scroll; height: 175px; position:relative; ", width = 12,
           uiOutput("Method_control_methods")))
         ),
-    box( title = "save & load",width = "15%", height = "10%",solidHeader = TRUE,status = "primary",
+    box( title = "Save & Load",width = "15%", height = "10%",solidHeader = TRUE,status = "primary",
          fluidRow(    
          column(9,textInput("Method_save_name","Saving name","Sandbox", width = "100%")),
              column(1,actionButton("Method_save","",icon=icon("save")))
@@ -21,9 +21,8 @@ output$Method_control_1 = renderUI({
              column(9,uiOutput("Method_load_names", width = "100%")),
              column(1,actionButton("Method_load","",icon=icon("folder-o")))
         )),
-    box(title = "start & stop", width = "15%", height = "10%",solidHeader = TRUE,status = "primary",
-        column(1,actionButton("Method_step_exec","",icon = icon("play"))),
-        column(1,offset=1,actionButton("Method_step_stop","",icon = icon("stop")))
+    box(title = "Start", width = "15%", height = "10%",solidHeader = TRUE,status = "primary",
+        column(1,actionButton("Method_step_exec","",icon = icon("play")))
         ),
     box( width = "15%",status = "warning",
          uiOutput("Method_feedback")),
@@ -31,9 +30,9 @@ output$Method_control_1 = renderUI({
         uiOutput("Method_control_gcode"))
     ),
     column(9,
-    box(title = "settings", width = "85%", height = "45%",status = "warning",
+    box(title = "Settings", width = "85%", height = "45%",status = "warning",
       uiOutput("Method_control_settings")),
-    box(title = "information", width = "85%", height = "45%",status = "warning",
+    box(title = "Information", width = "85%", height = "45%",status = "warning",
       uiOutput("Method_control_infos"))
   )
   )
@@ -132,10 +131,6 @@ observeEvent(input$Method_step_exec,{
     }
 })
 
-## part for emergency stop
-observeEvent(input$Method_step_stop,{
-	printer$cancelprint()
-})
 
 
 ## gcode viewer
@@ -277,7 +272,7 @@ output$Method_step_appli_table = renderRHandsontable({
   if(!is.null(input$Method_steps)){
   data = Method$control[[as.numeric(input$Method_steps)]]$appli_table
   rhandsontable(data)%>%
-    hot_col("real_Volumn", readOnly = TRUE)%>%
+    hot_col("Vol_real", readOnly = TRUE)%>%
     hot_col("unit", readOnly = TRUE)
   }
 })

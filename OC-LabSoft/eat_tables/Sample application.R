@@ -9,9 +9,9 @@ appli_Table<-function(step){
 
   #applied Volumn per band
   Vol_band=band_length/reso*I*Drop_vol/1000
-  ## create original table |nozzle | Vol_wish | Vol_real
+  ## create original table |nozzle | Vol_set | Vol_real
   if(is.null(step$appli_table)){
-    appli_table = data.frame(nozzle=rep(1,nbr_band), wish_Volumn=rep(Vol_band,nbr_band), real_Volumn=rep(Vol_band,nbr_band), unit=rep("µl",nbr_band))
+    appli_table = data.frame(nozzle=rep(1,nbr_band), Vol_set=rep(Vol_band,nbr_band), Vol_real=rep(Vol_band,nbr_band), unit=rep("µL",nbr_band))
   }
   else
     {
@@ -19,14 +19,14 @@ appli_Table<-function(step){
       tablelength=nrow(step$appli_table)
       for (i in 1:tablelength)
       {
-        appli_table$real_Volumn[i]=round(appli_table$wish_Volumn[i]/Vol_band,0)*Vol_band
+        appli_table$Vol_real[i]=round(appli_table$Vol_set[i]/Vol_band,0)*Vol_band
       }
       diffRows=nbr_band -tablelength
       ## modify table length
       if(diffRows>0)
       {
       appli_table=rbind(appli_table,
-                        data.frame(nozzle=rep(1,diffRows), wish_Volumn=rep(Vol_band,diffRows), real_Volumn=rep(Vol_band,diffRows), unit=rep("µl",diffRows))
+                        data.frame(nozzle=rep(1,diffRows), Vol_set=rep(Vol_band,diffRows), Vol_real=rep(Vol_band,diffRows), unit=rep("µL",diffRows))
       			)
 }
       else if(diffRows<0)
@@ -81,7 +81,7 @@ generate_gcode<-function(step){
   band_start=seq(from=dist_y,by=gap,length.out = nbr_band)
   band_end=seq(from=dist_y+gap,by=gap,length.out = nbr_band)
   nozzle= step$appli_table$nozzle
-  repSpray=step$appli_table$real_Volumn/Vol_band
+  repSpray=step$appli_table$Vol_real/Vol_band
   
   gcode=c()
   #gcode creator
