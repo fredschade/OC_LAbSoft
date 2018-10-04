@@ -1,3 +1,18 @@
+# OC DRIVER: kann aus configs OC-HW ansteuern
+# beinhaltet GCODE translator (config) -> gcode
+# ACHTUNG er kann keine R tabelle verstehen! :)
+
+# ' main () {
+#   # source(ocDriver.R, local=T)
+#   
+#   # config = extractConfigFromTable(table)
+#   # ocDriver.sampleApplication(config)
+#   # ocDriver intern: gcode  = createGCODEFromConfig(config)
+# 
+# 
+# }'
+
+
 # generates Table withe applied volume
 appli_Table<-function(step){
   
@@ -38,6 +53,15 @@ appli_Table<-function(step){
   
   return(appli_table)
 }
+# applicationSampler = ocDriver.createGCODEForSampleApplication(table) : object
+# applicationSampler.run()
+
+# TODO: extract table data in encapsulated logic/func
+# example:
+# config = extractConfigFromTable(table)
+# gcode  = createGCODEFromConfig(config)
+#
+
 
 # generates gcode for the Application  
 generate_gcode<-function(step){  

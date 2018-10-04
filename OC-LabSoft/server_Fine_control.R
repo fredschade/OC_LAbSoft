@@ -1,3 +1,5 @@
+# todo: this file should only contain ui description and event handler bindings#
+# todo: extract printer logic into new software layer
 
 # GUI
 output$ink_test_control_1 = renderUI({
@@ -58,14 +60,25 @@ output$ink_test_control_1 = renderUI({
   )
   )
   )
-})
+  })
 #---------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------
 #function
 #---------
 ## motor control
+# e.g.
+# printerSendTestInc(input) {
+#   printer$send(toupper(input$test_ink_cmd))
+#   printer$Print()
+# }
+# restEndpointTestInk(cmd) {
+#   printerSendTestInc(cmd)
+#   
+# }
 
-observeEvent(input$test_ink_cmd_button,{
+observeEvent(input$test_ink_cmd_button,{ # event handler
+  # should call our new printer core library
+  # printerSendTestInc(String) : steuert
 	printer$send(toupper(input$test_ink_cmd))
 	printer$Print()
 })

@@ -39,7 +39,6 @@ output$Method_control_1 = renderUI({
   )
 })
 
-
 #-----------------------------------------------------------------------------------
 # function
 #-------------------------------------------------------------------------------------
@@ -149,7 +148,7 @@ output$Method_control_gcode = renderUI({
 
 
 output$Method_gcode_download <- downloadHandler(
-  filename = function(x){paste0("OC_manager_",
+  filename = function(x){paste0("OC_Lab_",
                                 Method$control[[as.numeric(input$Method_steps)]]$type,
                                 "_",
                                 paste0(Method$control[[as.numeric(input$Method_steps)]]$table[,2],collapse = "_"),
@@ -248,6 +247,10 @@ observeEvent(input$Method_step_update,{
   Method$settings[[step]]$appli_table=data
   Method$control[[step]]$appli_table=data
   ## eat tables
+  ## evaluateSelectedStep(steps)
+  ## if type == Sample then sample$
+  ##  myFunction = source(myFunction.R)
+  ##
   withProgress(message = "Processing", value=0, { 
     path=paste0("eat_tables/",Method$control[[step]]$type,".R")
     source(path)
